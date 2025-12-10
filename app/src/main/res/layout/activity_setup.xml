@@ -1,0 +1,420 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".activity.SetupActivity"
+    android:background="@color/BackgroundSecondaryColor">
+
+    <include
+        android:id="@+id/main_toolbar"
+        layout="@layout/toolbar_layout"/>
+
+    <ScrollView
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_below="@id/main_toolbar"
+        android:scrollbars="vertical">
+
+        <LinearLayout
+            android:id="@+id/main_container"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:paddingStart="16dp"
+            android:paddingEnd="16dp"
+            android:paddingTop="20dp"
+            android:paddingBottom="24dp"
+            android:orientation="vertical">
+
+            <!-- Profile Image Section -->
+            <de.hdodenhof.circleimageview.CircleImageView
+                android:id="@+id/setup_user_image"
+                android:layout_width="100dp"
+                android:layout_height="100dp"
+                android:layout_gravity="center"
+                android:layout_marginTop="8dp"
+                android:layout_marginBottom="16dp"
+                android:src="@drawable/add_userimage_icon"
+                app:civ_border_width="3dp"
+                app:civ_border_color="@color/colorPrimary"/>
+
+            <LinearLayout
+                android:id="@+id/setup_username_container"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:layout_marginBottom="4dp"
+                android:orientation="horizontal"
+                android:gravity="center_vertical">
+
+                <TextView
+                    android:id="@+id/setup_username"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginEnd="8dp"
+                    android:background="@null"
+                    android:text="ahmd"
+                    android:textAlignment="center"
+                    android:textColor="@color/TitleTextColor"
+                    android:textSize="24sp"
+                    android:textStyle="bold"
+                    android:fontFamily="sans-serif-medium" />
+
+                <ImageView
+                    android:id="@+id/imageView4"
+                    android:layout_width="18dp"
+                    android:layout_height="18dp"
+                    android:scaleType="fitCenter"
+                    app:tint="@color/IconColor"
+                    app:srcCompat="@drawable/edit_icon" />
+            </LinearLayout>
+
+            <TextView
+                android:id="@+id/setup_position"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:layout_marginBottom="24dp"
+                android:background="@null"
+                android:text="Gym Assistant"
+                android:textAlignment="center"
+                android:textColor="@color/SecondaryTextColor"
+                android:textSize="15sp" />
+
+
+            <!-- Weight & Height Card -->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:weightSum="2">
+
+                <androidx.cardview.widget.CardView
+                    android:id="@+id/setup_weight_container"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:layout_marginEnd="8dp"
+                    app:cardCornerRadius="16dp"
+                    app:cardElevation="3dp"
+                    app:cardBackgroundColor="@color/CardBackgroundColor">
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="vertical"
+                        android:padding="20dp"
+                        android:gravity="center">
+
+                        <TextView
+                            android:id="@+id/setup_weight"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="70.2 kg"
+                            android:textAlignment="center"
+                            android:textColor="@color/TitleTextColor"
+                            android:textSize="20sp"
+                            android:textStyle="bold"
+                            android:fontFamily="sans-serif-medium" />
+
+                        <TextView
+                            android:id="@+id/textViewe293"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="4dp"
+                            android:text="Weight"
+                            android:textAlignment="center"
+                            android:textColor="@color/SecondaryTextColor"
+                            android:textSize="13sp" />
+
+                    </LinearLayout>
+
+                </androidx.cardview.widget.CardView>
+
+                <androidx.cardview.widget.CardView
+                    android:id="@+id/setup_height_container"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:layout_marginStart="8dp"
+                    app:cardCornerRadius="16dp"
+                    app:cardElevation="3dp"
+                    app:cardBackgroundColor="@color/CardBackgroundColor">
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="vertical"
+                        android:padding="20dp"
+                        android:gravity="center">
+
+                        <TextView
+                            android:id="@+id/setup_height"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="191 cm"
+                            android:textAlignment="center"
+                            android:textColor="@color/TitleTextColor"
+                            android:textSize="20sp"
+                            android:textStyle="bold"
+                            android:fontFamily="sans-serif-medium" />
+
+                        <TextView
+                            android:id="@+id/textView29e3"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="4dp"
+                            android:text="Height"
+                            android:textAlignment="center"
+                            android:textColor="@color/SecondaryTextColor"
+                            android:textSize="13sp" />
+
+                    </LinearLayout>
+
+                </androidx.cardview.widget.CardView>
+
+            </LinearLayout>
+
+            <!-- Birthday Card -->
+            <androidx.cardview.widget.CardView
+                android:id="@+id/setup_birthday_container"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="16dp"
+                app:cardCornerRadius="16dp"
+                app:cardElevation="3dp"
+                app:cardBackgroundColor="@color/CardBackgroundColor">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:padding="20dp"
+                    android:gravity="center">
+
+                    <TextView
+                        android:id="@+id/setup_birthday"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="10 / 07 / 2006"
+                        android:textAlignment="center"
+                        android:textColor="@color/TitleTextColor"
+                        android:textSize="20sp"
+                        android:textStyle="bold"
+                        android:fontFamily="sans-serif-medium" />
+
+                    <TextView
+                        android:id="@+id/textView293"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="4dp"
+                        android:text="Birthday"
+                        android:textAlignment="center"
+                        android:textColor="@color/SecondaryTextColor"
+                        android:textSize="13sp" />
+
+                </LinearLayout>
+
+            </androidx.cardview.widget.CardView>
+
+
+            <!-- Gender Card -->
+            <androidx.cardview.widget.CardView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="16dp"
+                app:cardCornerRadius="16dp"
+                app:cardElevation="3dp"
+                app:cardBackgroundColor="@color/CardBackgroundColor">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:padding="20dp">
+
+                    <TextView
+                        android:id="@+id/textViewre293"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Gender"
+                        android:textColor="@color/TitleTextColor"
+                        android:textSize="18sp"
+                        android:textStyle="bold"
+                        android:fontFamily="sans-serif-medium"
+                        android:layout_marginBottom="16dp" />
+
+                    <View
+                        android:layout_width="match_parent"
+                        android:layout_height="1dp"
+                        android:background="@color/LineColor"
+                        android:layout_marginBottom="12dp" />
+
+                    <RadioButton
+                        android:id="@+id/setup_account_male_button"
+                        android:layout_width="match_parent"
+                        android:layout_height="56dp"
+                        android:drawableEnd="@drawable/small_right_arrow"
+                        android:drawableTint="@color/IconColor"
+                        android:paddingStart="8dp"
+                        android:paddingEnd="8dp"
+                        android:text="Male"
+                        android:textColor="@color/PrimaryTextColor"
+                        android:textSize="16sp"
+                        android:fontFamily="sans-serif" />
+
+                    <View
+                        android:layout_width="match_parent"
+                        android:layout_height="1dp"
+                        android:background="@color/LineColor"
+                        android:layout_marginStart="40dp" />
+
+                    <RadioButton
+                        android:id="@+id/setup_account_female_button"
+                        android:layout_width="match_parent"
+                        android:layout_height="56dp"
+                        android:drawableEnd="@drawable/small_right_arrow"
+                        android:drawableTint="@color/IconColor"
+                        android:paddingStart="8dp"
+                        android:paddingEnd="8dp"
+                        android:text="Female"
+                        android:textColor="@color/PrimaryTextColor"
+                        android:textSize="16sp"
+                        android:fontFamily="sans-serif" />
+
+                </LinearLayout>
+
+            </androidx.cardview.widget.CardView>
+
+
+            <!-- Activity Level Card -->
+            <androidx.cardview.widget.CardView
+                android:id="@+id/setup_activity_level_container"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="16dp"
+                app:cardCornerRadius="16dp"
+                app:cardElevation="3dp"
+                app:cardBackgroundColor="@color/CardBackgroundColor">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:padding="20dp">
+
+                    <TextView
+                        android:id="@+id/textViyewe293"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Activity Level"
+                        android:textColor="@color/TitleTextColor"
+                        android:textSize="18sp"
+                        android:textStyle="bold"
+                        android:fontFamily="sans-serif-medium"
+                        android:layout_marginBottom="16dp" />
+
+                    <View
+                        android:layout_width="match_parent"
+                        android:layout_height="1dp"
+                        android:background="@color/LineColor"
+                        android:layout_marginBottom="12dp" />
+
+                    <RadioButton
+                        android:id="@+id/setup_account_sedentary_button"
+                        android:layout_width="match_parent"
+                        android:layout_height="56dp"
+                        android:drawableEnd="@drawable/small_right_arrow"
+                        android:drawableTint="@color/IconColor"
+                        android:paddingStart="8dp"
+                        android:paddingEnd="8dp"
+                        android:text="Sedentary"
+                        android:textColor="@color/PrimaryTextColor"
+                        android:textSize="16sp"
+                        android:fontFamily="sans-serif" />
+
+                    <View
+                        android:layout_width="match_parent"
+                        android:layout_height="1dp"
+                        android:background="@color/LineColor"
+                        android:layout_marginStart="40dp" />
+
+                    <RadioButton
+                        android:id="@+id/setup_account_lightly_active_button"
+                        android:layout_width="match_parent"
+                        android:layout_height="56dp"
+                        android:drawableEnd="@drawable/small_right_arrow"
+                        android:drawableTint="@color/IconColor"
+                        android:paddingStart="8dp"
+                        android:paddingEnd="8dp"
+                        android:text="Lightly Active"
+                        android:textColor="@color/PrimaryTextColor"
+                        android:textSize="16sp"
+                        android:fontFamily="sans-serif" />
+
+                    <View
+                        android:layout_width="match_parent"
+                        android:layout_height="1dp"
+                        android:background="@color/LineColor"
+                        android:layout_marginStart="40dp" />
+
+                    <RadioButton
+                        android:id="@+id/setup_account_moderately_active_button"
+                        android:layout_width="match_parent"
+                        android:layout_height="56dp"
+                        android:drawableEnd="@drawable/small_right_arrow"
+                        android:drawableTint="@color/IconColor"
+                        android:paddingStart="8dp"
+                        android:paddingEnd="8dp"
+                        android:text="Moderately Active"
+                        android:textColor="@color/PrimaryTextColor"
+                        android:textSize="16sp"
+                        android:fontFamily="sans-serif" />
+
+                    <View
+                        android:layout_width="match_parent"
+                        android:layout_height="1dp"
+                        android:background="@color/LineColor"
+                        android:layout_marginStart="40dp" />
+
+                    <RadioButton
+                        android:id="@+id/setup_account_very_active_button"
+                        android:layout_width="match_parent"
+                        android:layout_height="56dp"
+                        android:drawableEnd="@drawable/small_right_arrow"
+                        android:drawableTint="@color/IconColor"
+                        android:paddingStart="8dp"
+                        android:paddingEnd="8dp"
+                        android:text="Very Active"
+                        android:textColor="@color/PrimaryTextColor"
+                        android:textSize="16sp"
+                        android:fontFamily="sans-serif" />
+
+                </LinearLayout>
+
+            </androidx.cardview.widget.CardView>
+
+            <!-- Submit Button -->
+            <Button
+                android:id="@+id/setup_setup_complete_button"
+                android:layout_width="match_parent"
+                android:layout_height="56dp"
+                android:layout_gravity="center"
+                android:layout_marginTop="32dp"
+                android:layout_marginBottom="24dp"
+                android:background="@drawable/pill_button_primary"
+                android:text="Save Changes"
+                android:textAllCaps="false"
+                android:textColor="@color/ButtonTextColor"
+                android:textSize="16sp"
+                android:textStyle="bold"
+                android:fontFamily="sans-serif-medium"
+                android:elevation="4dp" />
+
+        </LinearLayout>
+
+    </ScrollView>
+
+</RelativeLayout>
