@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.appcompat.widget.Toolbar xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/toolbar"
+    android:layout_width="match_parent"
+    android:layout_height="60dp"
+    android:background="@color/ToolBarColor"
+    android:elevation="4dp"
+    android:theme="@style/ThemeOverlay.AppCompat.Dark.ActionBar"
+    android:paddingStart="16dp"
+    android:paddingEnd="16dp"
+    app:contentInsetStartWithNavigation="0dp"
+    app:titleTextColor="@color/LightTextColor">
+
+    <ImageView
+        android:id="@+id/toolbar_logo_text"
+        android:layout_width="120dp"
+        android:layout_height="40dp"
+        android:src="@drawable/logo"
+        android:scaleType="fitStart"
+        android:visibility="gone"/>
+
+    <de.hdodenhof.circleimageview.CircleImageView
+        android:id="@+id/toolbar_user_image"
+        android:layout_width="36dp"
+        android:layout_height="36dp"
+        android:layout_gravity="end"
+        android:layout_marginEnd="4dp"
+        android:src="@drawable/default_user_image"
+        app:civ_border_width="2dp"
+        app:civ_border_color="@color/LightTextColor"/>
+
+    <ImageButton
+        android:id="@+id/toolbar_profile_edit_button"
+        android:layout_width="36dp"
+        android:layout_height="36dp"
+        android:src="@drawable/profile_edit_icon"
+        android:background="?attr/selectableItemBackgroundBorderless"
+        android:tint="@color/LightTextColor"
+        android:scaleType="centerInside"
+        android:padding="6dp"
+        android:layout_gravity="end"
+        android:layout_marginEnd="12dp"
+        android:visibility="gone"/>
+
+</androidx.appcompat.widget.Toolbar>

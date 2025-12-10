@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "854895005162",
+    "project_id": "ifit-df069",
+    "storage_bucket": "ifit-df069.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:854895005162:android:2e35758a5cf50bad0ff693",
+        "android_client_info": {
+          "package_name": "com.taha.fittrack"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyB8C9byWGL1t9HhTQeDyGRYyNhg4FIGhys"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
