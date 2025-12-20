@@ -286,7 +286,7 @@ public class AddFoodActivity extends AppCompatActivity
                     }
                     else
                     {
-                        createdBy.setText("iFit Team");
+                        createdBy.setText("FitTrack Team");
                     }
                 }
             }
