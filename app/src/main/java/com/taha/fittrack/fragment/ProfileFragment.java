@@ -567,7 +567,7 @@ public class ProfileFragment extends Fragment
                                 position = dataSnapshot.child("userposition").getValue().toString();
                                 if(!TextUtils.isEmpty(position))
                                 {
-                                    profilePosition.setText(position+" at iFit");
+                                    profilePosition.setText(position+" at FitTrack");
                                     profilePosition.setVisibility(View.VISIBLE);
                                 }
                             }
