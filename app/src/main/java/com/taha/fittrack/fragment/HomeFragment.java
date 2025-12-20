@@ -1053,15 +1053,12 @@ public class HomeFragment extends Fragment
         workoutCardBurnedCalories.setText(strUserWorkout);
 
 
-        strUserFinalCalories = String.valueOf(Integer.parseInt(strUserFoodCalories) - Integer.parseInt(strUserWorkout));
-        summaryCardFinalCalories.setText(strUserFinalCalories);
-
-
         summaryCardTDEE01.setText("/ "+strUserTDEE);
         summaryCardTDEE02.setText(strUserTDEE);
 
         strUserCaloriesRemaining = fc.CaloriesRemaining(strUserTDEE, strUserFoodCalories, strUserWorkout);
         summaryCardCaloriesRemaining.setText(strUserCaloriesRemaining);
+        summaryCardFinalCalories.setText(strUserCaloriesRemaining);
 
 
         summaryCardCaloriesBarValue = fc.ProgressBarValue(strUserTDEE, strUserCaloriesRemaining);
