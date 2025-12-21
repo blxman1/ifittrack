@@ -3,6 +3,7 @@ package com.taha.fittrack.fragment;
 import android.app.Dialog;
 import android.app.ProgressDialog;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import androidx.annotation.NonNull;
 import androidx.fragment.app.Fragment;
@@ -39,6 +40,7 @@ import java.text.DecimalFormat;
 import java.text.NumberFormat;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.Locale;
 
@@ -49,7 +51,7 @@ public class HomeFragment extends Fragment
 
     private FirebaseAuth firebaseAuth;
     private DatabaseReference userDatabaseReference, foodDiaryDatabaseReference, foodDatabaseReference, waterDiaryDatabaseReference,
-            workoutDiaryDatabaseReference, achievementDatabaseReference;
+            workoutDiaryDatabaseReference, achievementDatabaseReference, tdeeDatabaseReference;
 
     private String currentUserID;
     private ProgressDialog loadingBar;
@@ -62,7 +64,7 @@ public class HomeFragment extends Fragment
     private TextView summaryCardFinalCalories, summaryCardTDEE01, summaryCardTDEE02, summaryCardFoodCalories, summaryCardWorkoutCalories,
             summaryCardCaloriesRemaining, summaryCardTips;
     private int summaryCardCaloriesBarValue;
-    private LinearLayout SummaryCard;
+    private Button summaryCardDiaryBtn;
 
 
     private TextView foodCardConsumedCalories;
@@ -74,7 +76,7 @@ public class HomeFragment extends Fragment
 
 
     private ImageButton waterCardWaterAddBtn, waterCardWaterMinusBtn;
-    private TextView waterCardGlasses;
+    private TextView waterCardGlasses, waterCardHints;
 
 
     private Button weightCardGoalBtn, weightCardRecordBtn;
@@ -139,8 +141,7 @@ public class HomeFragment extends Fragment
             intent.putExtra("intentFrom", "null");
         }
 
-
-        SummaryCard = view.findViewById(R.id.home_summary_card);
+        summaryCardDiaryBtn = (Button) view.findViewById(R.id.home_summary_card_diary_button);
         summaryCardCaloriesBar = (ProgressBar) view.findViewById(R.id.home_summary_card_calories_bar);
         summaryCardFinalCalories = (TextView) view.findViewById(R.id.home_summary_card_final_calories);
         summaryCardTDEE01 = (TextView) view.findViewById(R.id.home_summary_card_TDEE_01);
@@ -168,6 +169,7 @@ public class HomeFragment extends Fragment
         waterCardGlasses = (TextView) view.findViewById(R.id.home_water_card_glasses);
         waterCardWaterAddBtn = (ImageButton) view.findViewById(R.id.home_water_card_glasses_add_button);
         waterCardWaterMinusBtn = (ImageButton) view.findViewById(R.id.home_water_card_glasses_minus_button);
+        waterCardHints = (TextView) view.findViewById((R.id.home_water_card_hint));
 
 
         weightCardGoalBtn = (Button) view.findViewById(R.id.home_weight_card_goal_button);
@@ -195,7 +197,7 @@ public class HomeFragment extends Fragment
         bmiCardTips = (TextView) view.findViewById(R.id.home_bmi_card_tips);
 
 
-        SummaryCard.setOnClickListener(new View.OnClickListener()
+        summaryCardDiaryBtn.setOnClickListener(new View.OnClickListener()
         {
             @Override
             public void onClick(View v)
@@ -576,6 +578,8 @@ public class HomeFragment extends Fragment
             HashMap waterDiaryMap = new HashMap();
             waterDiaryMap.put("glasses", strUserWaterGlasses);
             waterDiaryDatabaseReference.updateChildren(waterDiaryMap);
+
+            updateWaterMessage(Integer.parseInt(strUserWaterGlasses));
         }
     }
 
@@ -590,13 +594,48 @@ public class HomeFragment extends Fragment
             HashMap waterDiaryMap = new HashMap();
             waterDiaryMap.put("glasses", strUserWaterGlasses);
             waterDiaryDatabaseReference.updateChildren(waterDiaryMap);
+
+            updateWaterMessage(Integer.parseInt(strUserWaterGlasses));
         }
         else
         {
             HashMap waterDiaryMap = new HashMap();
             waterDiaryMap.put("glasses", "01");
             waterDiaryDatabaseReference.updateChildren(waterDiaryMap);
+
+            updateWaterMessage(1);
         }
+    }
+
+    private void updateWaterMessage(int glassesCount) {
+        String message;
+        int textColor;
+
+        if (glassesCount == 0) {
+            message = "Time to drink some water!";
+            textColor = R.color.WarningTextColor;
+        } else if (glassesCount < 3) {
+            message = "Keep going! You're just getting started.";
+            textColor = R.color.WarningTextColor;
+        } else if (glassesCount < 5) {
+            message = "Good progress! Stay hydrated.";
+            textColor = R.color.SecondaryTextColor;
+        } else if (glassesCount < 8) {
+            message = "Almost there! Just a few more glasses.";
+            textColor = R.color.SecondaryTextColor;
+        } else if (glassesCount == 8) {
+            message = "Perfect! You've reached your daily goal!";
+            textColor = R.color.SuccessTextColor;
+        } else if (glassesCount < 12) {
+            message = "Awesome! You're exceeding your goal!";
+            textColor = R.color.SuccessTextColor;
+        } else {
+            message = "Hydration champion! Keep it up!";
+            textColor = R.color.SuccessTextColor;
+        }
+
+        waterCardHints.setText(message);
+        waterCardHints.setTextColor(getResources().getColor(textColor));
     }
 
 
@@ -759,6 +798,7 @@ public class HomeFragment extends Fragment
                         if(!TextUtils.isEmpty(strUserWaterGlasses))
                         {
                             waterCardGlasses.setText(strUserWaterGlasses);
+                            updateWaterMessage(Integer.parseInt(strUserWaterGlasses));
                         }
                     }
                 }
@@ -779,94 +819,81 @@ public class HomeFragment extends Fragment
     /* getting user food details from firebase database  */
     private void GetUserFoodData()
     {
-        foodDiaryDatabaseReference.addValueEventListener(new ValueEventListener()
+        foodDiaryDatabaseReference.addListenerForSingleValueEvent(new ValueEventListener()
         {
             @Override
             public void onDataChange(@NonNull DataSnapshot dataSnapshot)
             {
                 if(dataSnapshot.exists())
                 {
-                    /* count the user foods */
-                    diariesFoodCount = dataSnapshot.getChildrenCount();
+                    final long totalEntries = dataSnapshot.getChildrenCount();
+                    final int[] processedCount = new int[]{0};
+
                     for(final DataSnapshot ds : dataSnapshot.getChildren())
                     {
-                        /* getting the food ID */
-                        String foodID = ds.getKey();
+                        String foodID = ds.child("foodID").getValue(String.class);
 
-                        foodDiaryDatabaseReference.child(foodID).addValueEventListener(new ValueEventListener()
+                        final String servingSize;
+                        if(ds.hasChild("numberOfServing"))
                         {
-                            @Override
-                            public void onDataChange(@NonNull DataSnapshot dataSnapshot)
-                            {
-                                if(dataSnapshot.exists())
-                                {
-                                    if(dataSnapshot.hasChild("numberOfServing"))
-                                    {
-                                        strUserNumberOfServing = dataSnapshot.child("numberOfServing").getValue().toString();
-                                    }
-                                }
-                            }
-
-                            @Override
-                            public void onCancelled(@NonNull DatabaseError databaseError)
-                            {
-
-                            }
-                        });
-
-                        foodDatabaseReference.child(foodID).addValueEventListener(new ValueEventListener()
+                            servingSize = ds.child("numberOfServing").getValue().toString();
+                        }
+                        else
                         {
-                            @Override
-                            public void onDataChange(@NonNull DataSnapshot dataSnapshot)
+                            servingSize = "1";
+                        }
+
+                        if (!TextUtils.isEmpty(foodID))
+                        {
+                            foodDatabaseReference.child(foodID).addListenerForSingleValueEvent(new ValueEventListener()
                             {
-                                if(dataSnapshot.exists())
+                                @Override
+                                public void onDataChange(@NonNull DataSnapshot foodSnapshot)
                                 {
-                                    if(dataSnapshot.hasChild("foodservingsize"))
+                                    if(foodSnapshot.exists() && foodSnapshot.hasChild("foodcalories"))
                                     {
-                                        strUserServingSize = dataSnapshot.child("foodservingsize").getValue().toString();
+                                        String foodCalories = foodSnapshot.child("foodcalories").getValue().toString();
+                                        double calories = Double.parseDouble(servingSize) * Double.parseDouble(foodCalories);
+                                        strUserFoodCalories = String.format(Locale.US,"%.0f",Double.parseDouble(strUserFoodCalories) + calories);
                                     }
 
-                                    if(dataSnapshot.hasChild("foodcalories"))
-                                    {
-                                        String foodCalories = dataSnapshot.child("foodcalories").getValue().toString();
-                                        foodCalories = String.format(Locale.US,"%.0f",(Double.parseDouble(strUserNumberOfServing) * Double.parseDouble(foodCalories)) / Double.parseDouble(strUserServingSize));
-                                        strUserFoodCalories = String.format(Locale.US,"%.0f",(Double.parseDouble(strUserFoodCalories) + Double.parseDouble(foodCalories)));
-                                    }
+                                    processedCount[0]++;
 
-                                    strUserServingSize="1";
-                                    strUserNumberOfServing="1";
-
-                                    diariesFoodCount = diariesFoodCount - 1;
-
-                                    /* checking whether  finished the calculation or not */
-                                    if(diariesFoodCount == 0)
+                                    if(processedCount[0] == totalEntries)
                                     {
                                         GetUserWorkoutData();
                                     }
                                 }
-                            }
 
-                            @Override
-                            public void onCancelled(@NonNull DatabaseError databaseError)
+                                @Override
+                                public void onCancelled(@NonNull DatabaseError databaseError)
+                                {
+                                    processedCount[0]++;
+                                    if(processedCount[0] == totalEntries)
+                                    {
+                                        GetUserWorkoutData();
+                                    }
+                                }
+                            });
+                        }
+                        else {
+                            processedCount[0]++;
+                            if(processedCount[0] == totalEntries)
                             {
-
+                                GetUserWorkoutData();
                             }
-                        });
-
-
+                        }
                     }
                 }
-                else
-                {
+                else{
                     GetUserWorkoutData();
                 }
-
             }
 
             @Override
             public void onCancelled(@NonNull DatabaseError databaseError)
             {
-
+                GetUserWorkoutData();
             }
         });
     }
@@ -950,6 +977,12 @@ public class HomeFragment extends Fragment
 
             strUserTDEE = fc.TDEE(strUserAge, strUserCurrentWeight, strUserHeight, strUserGender, strUserActivityLevel);
 
+            SimpleDateFormat dateFormat = new SimpleDateFormat("dd-MMM-yyyy");
+            String todayDate = dateFormat.format(new Date());
+
+            tdeeDatabaseReference = FirebaseDatabase.getInstance().getReference().child("TDEE").child(currentUserID).child(todayDate);
+
+            tdeeDatabaseReference.setValue(strUserTDEE);
 
             weightCardCurrentWeight.setText(strUserCurrentWeight);
 
@@ -1075,16 +1108,10 @@ public class HomeFragment extends Fragment
             summaryCardCaloriesRemaining.setTextColor(getResources().getColor(R.color.WarningTextColor));
         }
 
-
-
-        strUserFoodCalories = "0";
-        strUserWorkout = "0";
-
         if(intentFrom.equals("SplashActivity") || intentFrom.equals("LoginActivity") || intentFrom.equals("CreateAccountActivity"))
         {
             loadingBar.dismiss();
         }
-
     }
 
 

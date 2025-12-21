@@ -652,6 +652,63 @@ public class SetupActivity extends AppCompatActivity {
         });
     }
 
+    private boolean validateUserInformation() {
+        boolean isValid = true;
+        StringBuilder errorMessage = new StringBuilder();
+
+        // Check username
+        if (TextUtils.isEmpty(editedUsername) && TextUtils.isEmpty(retrieveUsername)) {
+            errorMessage.append("Username is required\n");
+            isValid = false;
+        }
+
+        // Check birthday (all parts)
+        if ((TextUtils.isEmpty(editedBday) || TextUtils.isEmpty(editedBmonth) || TextUtils.isEmpty(editedByear)) &&
+                (TextUtils.isEmpty(retrieveBDay) || TextUtils.isEmpty(retrieveBMonth) || TextUtils.isEmpty(retrieveBYear))) {
+            errorMessage.append("Birthday is required\n");
+            isValid = false;
+        }
+
+        // Check height
+        if (TextUtils.isEmpty(editedheight) && TextUtils.isEmpty(retrieveHeight)) {
+            errorMessage.append("Height is required\n");
+            isValid = false;
+        }
+
+        // Check weight
+        if (TextUtils.isEmpty(editedcurrentweight) && TextUtils.isEmpty(retrieveCurrentWeight)) {
+            errorMessage.append("Weight is required\n");
+            isValid = false;
+        }
+
+        // Check gender
+        if (TextUtils.isEmpty(editedgender) && TextUtils.isEmpty(retrieveGender)) {
+            errorMessage.append("Gender is required\n");
+            isValid = false;
+        }
+
+        // Check activity level
+        if (TextUtils.isEmpty(editedactivitylevel) && TextUtils.isEmpty(retrieveActivityLevel)) {
+            errorMessage.append("Activity level is required\n");
+            isValid = false;
+        }
+
+        // If there are errors, show them
+        if (!isValid) {
+            showErrorDialog("Missing Information\n\n", errorMessage.toString());
+        }
+
+        return isValid;
+    }
+
+    private void showErrorDialog(String title, String message) {
+        android.app.AlertDialog.Builder builder = new android.app.AlertDialog.Builder(this);
+        builder.setTitle(title)
+                .setMessage(message)
+                .setPositiveButton("OK", (dialog, which) -> dialog.dismiss())
+                .show();
+    }
+
     /* user image crop activities  */
     /*@Override
     protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data)
@@ -673,87 +730,91 @@ public class SetupActivity extends AppCompatActivity {
 
     /* send user details to database */
     private void SaveUserInformation() {
-        /* adding Loading bar */
-        if (IntentFrom.equals("ProfileFragment")) {
-            loadingbar = new ProgressDialog(this);
-            String ProgressDialogMessage = "Updating...";
-            SpannableString spannableMessage = new SpannableString(ProgressDialogMessage);
-            spannableMessage.setSpan(new RelativeSizeSpan(1.3f), 0, spannableMessage.length(), 0);
-            loadingbar.setMessage(spannableMessage);
-            loadingbar.show();
-            loadingbar.setCanceledOnTouchOutside(false);
-            loadingbar.setCancelable(false);
-        } else {
-            loadingbar = new ProgressDialog(this);
-            String ProgressDialogMessage = "Completing...";
-            SpannableString spannableMessage = new SpannableString(ProgressDialogMessage);
-            spannableMessage.setSpan(new RelativeSizeSpan(1.3f), 0, spannableMessage.length(), 0);
-            loadingbar.setMessage(spannableMessage);
-            loadingbar.show();
-            loadingbar.setCanceledOnTouchOutside(false);
-            loadingbar.setCancelable(false);
-        }
+
+        if (validateUserInformation()) {
+
+            /* adding Loading bar */
+            if (IntentFrom.equals("ProfileFragment")) {
+                loadingbar = new ProgressDialog(this);
+                String ProgressDialogMessage = "Updating...";
+                SpannableString spannableMessage = new SpannableString(ProgressDialogMessage);
+                spannableMessage.setSpan(new RelativeSizeSpan(1.3f), 0, spannableMessage.length(), 0);
+                loadingbar.setMessage(spannableMessage);
+                loadingbar.show();
+                loadingbar.setCanceledOnTouchOutside(false);
+                loadingbar.setCancelable(false);
+            } else {
+                loadingbar = new ProgressDialog(this);
+                String ProgressDialogMessage = "Completing...";
+                SpannableString spannableMessage = new SpannableString(ProgressDialogMessage);
+                spannableMessage.setSpan(new RelativeSizeSpan(1.3f), 0, spannableMessage.length(), 0);
+                loadingbar.setMessage(spannableMessage);
+                loadingbar.show();
+                loadingbar.setCanceledOnTouchOutside(false);
+                loadingbar.setCancelable(false);
+            }
 
 
-        HashMap usermap = new HashMap();
+            HashMap usermap = new HashMap();
 
-        /* username */
-        if (!TextUtils.isEmpty(editedUsername)) {
-            usermap.put("usersearchkeyword", editedUsername.toLowerCase());
-            usermap.put("username", editedUsername);
-        }
+            /* username */
+            if (!TextUtils.isEmpty(editedUsername)) {
+                usermap.put("usersearchkeyword", editedUsername.toLowerCase());
+                usermap.put("username", editedUsername);
+            }
 
-        /* userweight */
-        if (!TextUtils.isEmpty(editedcurrentweight)) {
-            usermap.put("usercurrentweight", editedcurrentweight);
-        }
+            /* userweight */
+            if (!TextUtils.isEmpty(editedcurrentweight)) {
+                usermap.put("usercurrentweight", editedcurrentweight);
+            }
 
-        /* userbirthday */
-        if (!TextUtils.isEmpty(editedBday) && !TextUtils.isEmpty(editedBmonth) && !TextUtils.isEmpty(editedByear)) {
-            usermap.put("userbday", editedBday);
-            usermap.put("userbmonth", editedBmonth);
-            usermap.put("userbyear", editedByear);
-        }
+            /* userbirthday */
+            if (!TextUtils.isEmpty(editedBday) && !TextUtils.isEmpty(editedBmonth) && !TextUtils.isEmpty(editedByear)) {
+                usermap.put("userbday", editedBday);
+                usermap.put("userbmonth", editedBmonth);
+                usermap.put("userbyear", editedByear);
+            }
 
-        /* userheight */
-        if (!TextUtils.isEmpty(editedheight)) {
-            usermap.put("userheight", editedheight);
-        }
+            /* userheight */
+            if (!TextUtils.isEmpty(editedheight)) {
+                usermap.put("userheight", editedheight);
+            }
 
-        /* usergender */
-        if (!TextUtils.isEmpty(editedgender)) {
-            usermap.put("usergender", editedgender);
-        }
+            /* usergender */
+            if (!TextUtils.isEmpty(editedgender)) {
+                usermap.put("usergender", editedgender);
+            }
 
-        /* useractivitylevel */
-        if (!TextUtils.isEmpty(editedactivitylevel)) {
-            usermap.put("useractivitylevel", editedactivitylevel);
-        }
+            /* useractivitylevel */
+            if (!TextUtils.isEmpty(editedactivitylevel)) {
+                usermap.put("useractivitylevel", editedactivitylevel);
+            }
 
-        userDatabaseReference.updateChildren(usermap).addOnCompleteListener(new OnCompleteListener() {
-            @Override
-            public void onComplete(@NonNull Task task) {
-                if (task.isSuccessful()) {
-                    if (imagePick == 1) {
-                        SaveUserImage();
+            userDatabaseReference.updateChildren(usermap).addOnCompleteListener(new OnCompleteListener() {
+                @Override
+                public void onComplete(@NonNull Task task) {
+                    if (task.isSuccessful()) {
+                        if (imagePick == 1) {
+                            SaveUserImage();
+                        } else {
+                            loadingbar.dismiss();
+                            if (IntentFrom.equals("ProfileFragment")) {
+                                SendUserToMainPage();
+                                Toast.makeText(SetupActivity.this, "Your Profile Update Successfully", Toast.LENGTH_SHORT).show();
+                            }
+                            if (IntentFrom.equals("CreateAccountActivity")) {
+                                SendUserToMainPage();
+                                Toast.makeText(SetupActivity.this, "Your Account Setup Successfully", Toast.LENGTH_SHORT).show();
+                            }
+                        }
                     } else {
                         loadingbar.dismiss();
-                        if (IntentFrom.equals("ProfileFragment")) {
-                            SendUserToMainPage();
-                            Toast.makeText(SetupActivity.this, "Your Profile Update Successfully", Toast.LENGTH_SHORT).show();
-                        }
-                        if (IntentFrom.equals("CreateAccountActivity")) {
-                            SendUserToMainPage();
-                            Toast.makeText(SetupActivity.this, "Your Account Setup Successfully", Toast.LENGTH_SHORT).show();
-                        }
+                        String msg = task.getException().getMessage();
+                        Toast.makeText(SetupActivity.this, "Error : " + msg, Toast.LENGTH_SHORT).show();
                     }
-                } else {
-                    loadingbar.dismiss();
-                    String msg = task.getException().getMessage();
-                    Toast.makeText(SetupActivity.this, "Error : " + msg, Toast.LENGTH_SHORT).show();
                 }
-            }
-        });
+            });
+        }
     }
 
 

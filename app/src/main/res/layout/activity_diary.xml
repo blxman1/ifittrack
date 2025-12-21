@@ -27,7 +27,7 @@
             <!-- ###### start of first card ###### -->
 
             <LinearLayout
-                android:id="@+id/diary_date_button"
+                android:id="@+id/diary_date_layout"
                 android:layout_width="match_parent"
                 android:layout_height="55dp"
                 android:background="@color/BackgroundPrimaryColor"
@@ -35,7 +35,7 @@
                 android:padding="10dp">
 
                 <ImageView
-                    android:id="@+id/imageView9"
+                    android:id="@+id/diary_date_left_arrow"
                     android:layout_width="wrap_content"
                     android:layout_height="match_parent"
                     android:layout_weight="1"
@@ -49,13 +49,13 @@
                     android:layout_weight="1"
                     android:gravity="center"
                     android:letterSpacing="0.3"
-                    android:text="TODAY"
+                    android:text="Today"
                     android:textAlignment="center"
                     android:textColor="@color/PrimaryTextColor"
                     android:textSize="18sp" />
 
                 <ImageView
-                    android:id="@+id/imageView10"
+                    android:id="@+id/diary_date_right_arrow"
                     android:layout_width="wrap_content"
                     android:layout_height="match_parent"
                     android:layout_weight="1"

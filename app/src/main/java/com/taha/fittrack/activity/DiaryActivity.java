@@ -14,6 +14,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.DatePicker;
+import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
@@ -33,6 +34,7 @@ import com.google.firebase.database.ValueEventListener;
 
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
+import java.util.Date;
 import java.util.Locale;
 
 import de.hdodenhof.circleimageview.CircleImageView;
@@ -46,18 +48,17 @@ public class DiaryActivity extends AppCompatActivity
 
     private FirebaseAuth firebaseAuth;
     private DatabaseReference foodDiaryDatabaseReference, foodDatabaseReference, userDatabaseReference, waterDiaryDatabaseReference,
-            workoutDiaryDatabaseReference;
+            workoutDiaryDatabaseReference, tdeeDiaryDatabaseReference;
 
 
     private String strUserCurrentWeight, strUserByear, strUserAge, strUserHeight, strUserGender, strUserActivityLevel,
-            strUserFood="0", strUserCarbs="0.0", strUserFat="0.0", strUserProtein="0.0", strUserWorkout="0", userServingSize="1",
+            strUserFood="0", strUserCarbs="0.0", strUserFat="0.0", strUserProtein="0.0", strUserWorkout="0", userServingSize,
             strUserDailyCalorieIntake, strUserCaloriesRemaining;
 
-    private String breakfastNumberOfServings = "1", breakfastServingSize = "1", lunchNumberOfServings = "1", lunchServingSize = "1",
-            dinnerNumberOfServings = "1", dinnerServingSize = "1", snackNumberOfServings = "1", snackServingSize = "1";
-
-    private LinearLayout dateButton;
+    private LinearLayout dateContainer;
     private TextView diaryDate;
+
+    private ImageView dateLeftArrow, dateRightArrow;
 
     private TextView userCaloriesRemaining, userFoodCalories, userWorkoutCalories, userDailyCaloriesIntake, userCarbs, userFat, userProtein;
 
@@ -79,7 +80,6 @@ public class DiaryActivity extends AppCompatActivity
     {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_diary);
-
 
         Intent intent = getIntent();
         intentFrom = intent.getExtras().getString("intentFrom");
@@ -105,7 +105,6 @@ public class DiaryActivity extends AppCompatActivity
         SimpleDateFormat currenDate = new SimpleDateFormat("dd-MMM-yyyy");
         currentDate = currenDate.format(calendar.getTime());
 
-
         firebaseAuth = FirebaseAuth.getInstance();
         currentUserID = firebaseAuth.getCurrentUser().getUid();
 
@@ -114,11 +113,12 @@ public class DiaryActivity extends AppCompatActivity
         userDatabaseReference = FirebaseDatabase.getInstance().getReference().child("Users");
         waterDiaryDatabaseReference = FirebaseDatabase.getInstance().getReference().child("WaterDiaries");
         workoutDiaryDatabaseReference = FirebaseDatabase.getInstance().getReference().child("WorkoutDiaries");
+        tdeeDiaryDatabaseReference = FirebaseDatabase.getInstance().getReference().child("TDEE");
 
-
-        dateButton = (LinearLayout) findViewById(R.id.diary_date_button);
+        dateContainer = (LinearLayout) findViewById(R.id.diary_date_layout);
         diaryDate = (TextView) findViewById(R.id.diary_date);
-
+        dateLeftArrow = (ImageView) findViewById(R.id.diary_date_left_arrow);
+        dateRightArrow = (ImageView) findViewById(R.id.diary_date_right_arrow);
 
         userCaloriesRemaining = (TextView) findViewById(R.id.diary_caloriecard_calorieremaining);
         userDailyCaloriesIntake = (TextView) findViewById(R.id.diary_caloriecard_dailycalorieintake);
@@ -177,7 +177,7 @@ public class DiaryActivity extends AppCompatActivity
         userWorkoutList.setLayoutManager(workoutLinearLayoutManager);
 
 
-        dateButton.setOnClickListener(new View.OnClickListener()
+        diaryDate.setOnClickListener(new View.OnClickListener()
         {
             @Override
             public void onClick(View v)
@@ -186,35 +186,50 @@ public class DiaryActivity extends AppCompatActivity
             }
         });
 
+        dateLeftArrow.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                navigateDate(-1);
+            }
+        });
+
+        dateRightArrow.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                navigateDate(1);
+            }
+        });
 
         if(intentFrom.equals("ViewAnotherUserProfile") && !currentUserID.equals(intentUserID))
         {
             GetUserData(intentUserID, currentDate);
-            DisplayUserAllBreakfastFoods(intentUserID, currentDate);
-            DisplayUserAllLunchFoods(intentUserID, currentDate);
-            DisplayUserAllDinnerFoods(intentUserID, currentDate);
-            DisplayUserAllSnacks(intentUserID, currentDate);
+            DisplayUserFoods(intentUserID, currentDate, "breakfast", userBreakfastFoodList);
+            DisplayUserFoods(intentUserID, currentDate, "lunch", userLunchFoodList);
+            DisplayUserFoods(intentUserID, currentDate, "dinner", userDinnerFoodList);
+            DisplayUserFoods(intentUserID, currentDate, "snack", userSnacksFoodList);
             DisplayUserAllWorkouts(intentUserID, currentDate);
             DisplayUserWaterGlasses(intentUserID, currentDate);
         }
         else
         {
             GetUserData(currentUserID, currentDate);
-            DisplayUserAllBreakfastFoods(currentUserID, currentDate);
-            DisplayUserAllLunchFoods(currentUserID, currentDate);
-            DisplayUserAllDinnerFoods(currentUserID, currentDate);
-            DisplayUserAllSnacks(currentUserID, currentDate);
+            DisplayUserFoods(currentUserID, currentDate, "breakfast", userBreakfastFoodList);
+            DisplayUserFoods(currentUserID, currentDate, "lunch", userLunchFoodList);
+            DisplayUserFoods(currentUserID, currentDate, "dinner", userDinnerFoodList);
+            DisplayUserFoods(currentUserID, currentDate, "snack", userSnacksFoodList);
             DisplayUserAllWorkouts(currentUserID, currentDate);
             DisplayUserWaterGlasses(currentUserID, currentDate);
         }
     }
 
-
-
-    /* open date picker dialog */
     private void PopupCalendar()
     {
         final Calendar myCalendar = Calendar.getInstance();
+
+        Calendar today = Calendar.getInstance();
+
+        SimpleDateFormat currentDateFormat = new SimpleDateFormat("dd-MMM-yyyy", Locale.US);
+        final String todayDateStr = currentDateFormat.format(today.getTime());
 
         DatePickerDialog.OnDateSetListener date = new DatePickerDialog.OnDateSetListener()
         {
@@ -229,32 +244,43 @@ public class DiaryActivity extends AppCompatActivity
                 SimpleDateFormat yearFormat = new SimpleDateFormat("yyyy", Locale.US);
                 SimpleDateFormat monthFormat = new SimpleDateFormat("MMM", Locale.US);
                 SimpleDateFormat dayFormat = new SimpleDateFormat("dd", Locale.US);
+                SimpleDateFormat dateFormat = new SimpleDateFormat("dd-MMM-yyyy");
 
                 String diaryChangedDate;
 
-                /* getting the chosen date */
-                diaryChangedDate = dayFormat.format(myCalendar.getTime()) +" "+ monthFormat.format(myCalendar.getTime()) +" "+ yearFormat.format(myCalendar.getTime());
-                diaryDate.setText(diaryChangedDate);
-                diaryChangedDate =  diaryChangedDate.replace(" ","-");
+                String selectedDate = dateFormat.format(myCalendar.getTime());
+
+                if (selectedDate.equals(todayDateStr))
+                {
+                    diaryDate.setText("Today");
+                }
+                else
+                {
+                    diaryDate.setText(dayFormat.format(myCalendar.getTime()) + " " +
+                            monthFormat.format(myCalendar.getTime()) + " " +
+                            yearFormat.format(myCalendar.getTime()));
+                }
+
+                diaryChangedDate = selectedDate;
 
 
                 if(intentFrom.equals("ViewAnotherUserProfile") && !currentUserID.equals(intentUserID))
                 {
                     GetUserData(intentUserID, diaryChangedDate);
-                    DisplayUserAllBreakfastFoods(intentUserID, diaryChangedDate);
-                    DisplayUserAllLunchFoods(intentUserID, diaryChangedDate);
-                    DisplayUserAllDinnerFoods(intentUserID, diaryChangedDate);
-                    DisplayUserAllSnacks(intentUserID, diaryChangedDate);
+                    DisplayUserFoods(intentUserID, diaryChangedDate, "breakfast", userBreakfastFoodList);
+                    DisplayUserFoods(intentUserID, diaryChangedDate, "lunch", userLunchFoodList);
+                    DisplayUserFoods(intentUserID, diaryChangedDate, "dinner", userDinnerFoodList);
+                    DisplayUserFoods(intentUserID, diaryChangedDate, "snack", userSnacksFoodList);
                     DisplayUserAllWorkouts(intentUserID, diaryChangedDate);
                     DisplayUserWaterGlasses(intentUserID, diaryChangedDate);
                 }
                 else
                 {
                     GetUserData(currentUserID, diaryChangedDate);
-                    DisplayUserAllBreakfastFoods(currentUserID, diaryChangedDate);
-                    DisplayUserAllLunchFoods(currentUserID, diaryChangedDate);
-                    DisplayUserAllDinnerFoods(currentUserID, diaryChangedDate);
-                    DisplayUserAllSnacks(currentUserID, diaryChangedDate);
+                    DisplayUserFoods(intentUserID, diaryChangedDate, "breakfast", userBreakfastFoodList);
+                    DisplayUserFoods(intentUserID, diaryChangedDate, "lunch", userLunchFoodList);
+                    DisplayUserFoods(intentUserID, diaryChangedDate, "dinner", userDinnerFoodList);
+                    DisplayUserFoods(intentUserID, diaryChangedDate, "snack", userSnacksFoodList);
                     DisplayUserAllWorkouts(currentUserID, diaryChangedDate);
                     DisplayUserWaterGlasses(currentUserID, diaryChangedDate);
                 }
@@ -265,8 +291,60 @@ public class DiaryActivity extends AppCompatActivity
         new DatePickerDialog(this, date, myCalendar.get(Calendar.YEAR), myCalendar.get(Calendar.MONTH),  myCalendar.get(Calendar.DAY_OF_MONTH)).show();
     }
 
+    private void navigateDate(int daysToAdd) {
+        try {
+            Calendar today = Calendar.getInstance();
+            SimpleDateFormat storageFormat = new SimpleDateFormat("dd-MMM-yyyy", Locale.US);
+            SimpleDateFormat displayFormat = new SimpleDateFormat("dd MMM yyyy", Locale.US);
+            String todayStorage = storageFormat.format(today.getTime());
 
+            String currentDateText = diaryDate.getText().toString();
+            Calendar calendar = Calendar.getInstance();
 
+            if (currentDateText.equals("Today")) {
+
+                calendar = Calendar.getInstance();
+            } else {
+
+                Date date = displayFormat.parse(currentDateText);
+                calendar.setTime(date);
+            }
+
+            calendar.add(Calendar.DAY_OF_MONTH, daysToAdd);
+
+            String storageDate = storageFormat.format(calendar.getTime());
+            String displayDate;
+
+            if (storageDate.equals(todayStorage)) {
+                displayDate = "Today";
+            } else {
+                displayDate = displayFormat.format(calendar.getTime());
+            }
+
+            diaryDate.setText(displayDate);
+
+            if(intentFrom.equals("ViewAnotherUserProfile") && !currentUserID.equals(intentUserID)) {
+                GetUserData(intentUserID, storageDate);
+                DisplayUserFoods(intentUserID, storageDate, "breakfast", userBreakfastFoodList);
+                DisplayUserFoods(intentUserID, storageDate, "lunch", userLunchFoodList);
+                DisplayUserFoods(intentUserID, storageDate, "dinner", userDinnerFoodList);
+                DisplayUserFoods(intentUserID, storageDate, "snack", userSnacksFoodList);
+                DisplayUserAllWorkouts(intentUserID, storageDate);
+                DisplayUserWaterGlasses(intentUserID, storageDate);
+            } else {
+                GetUserData(currentUserID, storageDate);
+                DisplayUserFoods(currentUserID, storageDate, "breakfast", userBreakfastFoodList);
+                DisplayUserFoods(currentUserID, storageDate, "lunch", userLunchFoodList);
+                DisplayUserFoods(currentUserID, storageDate, "dinner", userDinnerFoodList);
+                DisplayUserFoods(currentUserID, storageDate, "snack", userSnacksFoodList);
+                DisplayUserAllWorkouts(currentUserID, storageDate);
+                DisplayUserWaterGlasses(currentUserID, storageDate);
+            }
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
 
     public void GetUserData(final String userID, final String date)
     {
@@ -330,125 +408,101 @@ public class DiaryActivity extends AppCompatActivity
         });
     }
 
-
-
     private void GetUserFoodData(final String userID, final String date)
     {
-        foodDiaryDatabaseReference.child(userID).child(date).addValueEventListener(new ValueEventListener()
-        {
+        foodDiaryDatabaseReference.child(userID).child(date).addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
-            public void onDataChange(@NonNull DataSnapshot dataSnapshot)
-            {
-                if(dataSnapshot.exists())
-                {
-                    /* counting the user foods */
-                    diariesFoodCount = dataSnapshot.getChildrenCount();
+            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                if (dataSnapshot.exists()) {
+                    final long totalEntries = dataSnapshot.getChildrenCount();
+                    final int[] processedCount = {0};
 
-                    for(final DataSnapshot ds : dataSnapshot.getChildren())
-                    {
-                        /* getting the food ID */
-                        String foodID = ds.getKey();
+                    for (final DataSnapshot ds : dataSnapshot.getChildren()) {
 
-                        foodDiaryDatabaseReference.child(userID).child(date).child(foodID).addValueEventListener(new ValueEventListener()
-                        {
-                            @Override
-                            public void onDataChange(@NonNull DataSnapshot dataSnapshot)
+                        if (ds.exists()) {
+                            String foodID = ds.child("foodID").getValue(String.class);
+
+                            final String servingSize;
+
+                            if (ds.hasChild("numberOfServing")) {
+                                servingSize = ds.child("numberOfServing").getValue().toString();
+                            }
+                            else
                             {
-                                if(dataSnapshot.exists())
-                                {
-                                    if(dataSnapshot.hasChild("numberOfServing"))
-                                    {
-                                        userServingSize = dataSnapshot.child("numberOfServing").getValue().toString();
+                                servingSize = "1";
+                            }
+
+                            if (!TextUtils.isEmpty(foodID)) {
+                                foodDatabaseReference.child(foodID).addListenerForSingleValueEvent(new ValueEventListener() {
+                                    @Override
+                                    public void onDataChange(@NonNull DataSnapshot foodSnapshot) {
+                                        if (foodSnapshot.exists()) {
+                                            if (foodSnapshot.hasChild("foodcalories")) {
+                                                String foodCalories = foodSnapshot.child("foodcalories").getValue().toString();
+                                                double calories = Double.parseDouble(servingSize) * Double.parseDouble(foodCalories);
+                                                strUserFood = String.format(Locale.US, "%.0f", Double.parseDouble(strUserFood) + calories);
+                                            }
+
+                                            if (foodSnapshot.hasChild("foodcarbs")) {
+                                                String foodCarbs = foodSnapshot.child("foodcarbs").getValue().toString();
+                                                double carbs = Double.parseDouble(servingSize) * Double.parseDouble(foodCarbs);
+                                                strUserCarbs = String.format(Locale.US, "%.1f", Double.parseDouble(strUserCarbs) + carbs);
+                                            }
+
+                                            if (foodSnapshot.hasChild("foodprotein")) {
+                                                String foodProtein = foodSnapshot.child("foodprotein").getValue().toString();
+                                                double protein = Double.parseDouble(servingSize) * Double.parseDouble(foodProtein);
+                                                strUserProtein = String.format(Locale.US, "%.1f", Double.parseDouble(strUserProtein) + protein);
+                                            }
+
+                                            if (foodSnapshot.hasChild("foodfat")) {
+                                                String foodFat = foodSnapshot.child("foodfat").getValue().toString();
+                                                double fat = Double.parseDouble(servingSize) * Double.parseDouble(foodFat);
+                                                strUserFat = String.format(Locale.US, "%.1f", Double.parseDouble(strUserFat) + fat);
+                                            }
+                                        }
+                                        processedCount[0]++;
+
+                                        if (processedCount[0] == totalEntries) {
+                                            GetUserWorkoutData(userID, date);
+                                        }
                                     }
+
+                                    @Override
+                                    public void onCancelled(@NonNull DatabaseError databaseError) {
+                                        processedCount[0]++;
+                                        if (processedCount[0] == totalEntries) {
+                                            GetUserWorkoutData(userID, date);
+                                        }
+                                    }
+                                });
+                            }
+                            else {
+                                processedCount[0]++;
+                                if (processedCount[0] == totalEntries) {
+                                    GetUserWorkoutData(userID, date);
                                 }
                             }
-
-                            @Override
-                            public void onCancelled(@NonNull DatabaseError databaseError)
-                            {
-
+                        }
+                        else {
+                            processedCount[0]++;
+                            if (processedCount[0] == totalEntries) {
+                                GetUserWorkoutData(userID, date);
                             }
-                        });
-
-
-                        foodDatabaseReference.child(foodID).addValueEventListener(new ValueEventListener()
-                        {
-                            @Override
-                            public void onDataChange(@NonNull DataSnapshot dataSnapshot)
-                            {
-                                if(dataSnapshot.exists())
-                                {
-                                    String servingSize="1";
-
-                                    if(dataSnapshot.hasChild("foodservingsize"))
-                                    {
-                                       servingSize = dataSnapshot.child("foodservingsize").getValue().toString();
-                                    }
-
-                                    if(dataSnapshot.hasChild("foodcalories"))
-                                    {
-                                        String foodCalories = dataSnapshot.child("foodcalories").getValue().toString();
-                                        foodCalories = String.format(Locale.US,"%.0f",(Double.parseDouble(userServingSize) * Double.parseDouble(foodCalories)) / Double.parseDouble(servingSize));
-                                        strUserFood = String.format(Locale.US,"%.0f",(Double.parseDouble(strUserFood) + Double.parseDouble(foodCalories)));
-                                    }
-
-                                    if(dataSnapshot.hasChild("foodcarbs"))
-                                    {
-                                        String foodCarbs = dataSnapshot.child("foodcarbs").getValue().toString();
-                                        foodCarbs = String.format(Locale.US,"%.1f",(Double.parseDouble(userServingSize) * Double.parseDouble(foodCarbs)) / Double.parseDouble(servingSize));
-                                        strUserCarbs = String.format(Locale.US,"%.1f",(Double.parseDouble(strUserCarbs) + Double.parseDouble(foodCarbs)));
-                                    }
-
-                                    if(dataSnapshot.hasChild("foodprotein"))
-                                    {
-                                        String foodProtein = dataSnapshot.child("foodprotein").getValue().toString();
-                                        foodProtein = String.format(Locale.US,"%.1f",(Double.parseDouble(userServingSize) * Double.parseDouble(foodProtein)) / Double.parseDouble(servingSize));
-                                        strUserProtein = String.format(Locale.US,"%.1f",(Double.parseDouble(strUserProtein) + Double.parseDouble(foodProtein)));
-
-                                    }
-
-                                    if(dataSnapshot.hasChild("foodfat"))
-                                    {
-                                        String foodFat = dataSnapshot.child("foodfat").getValue().toString();
-                                        foodFat = String.format(Locale.US,"%.1f",(Double.parseDouble(userServingSize) * Double.parseDouble(foodFat)) / Double.parseDouble(servingSize));
-                                        strUserFat = String.format(Locale.US,"%.1f",(Double.parseDouble(strUserFat) + Double.parseDouble(foodFat)));
-                                    }
-
-                                    servingSize="1";
-                                    userServingSize="1";
-
-                                    diariesFoodCount = diariesFoodCount - 1;
-
-                                    /* checking whether  finished the calculation or not */
-                                    if(diariesFoodCount == 0)
-                                    {
-                                        GetUserWorkoutData(userID, date);
-                                    }
-                                }
-                            }
-
-                            @Override
-                            public void onCancelled(@NonNull DatabaseError databaseError)
-                            {
-
-                            }
-                        });
+                        }
                     }
                 }
-                else
-                {
+                else {
                     GetUserWorkoutData(userID, date);
                 }
             }
-
-            @Override
-            public void onCancelled(@NonNull DatabaseError databaseError)
-            {
-
-            }
+                @Override
+                public void onCancelled (@NonNull DatabaseError databaseError)
+                {
+                    GetUserWorkoutData(userID, date);
+                }
         });
     }
-
 
     private void GetUserWorkoutData(final String userID, final String date)
     {
@@ -483,7 +537,7 @@ public class DiaryActivity extends AppCompatActivity
                                 /* checking whether  finished the calculation or not */
                                 if(diariesWorkoutCount == 0)
                                 {
-                                    SetSummaryCardsDetails();
+                                    GetUserTDEEData(userID, date);
                                 }
                             }
 
@@ -499,7 +553,7 @@ public class DiaryActivity extends AppCompatActivity
                 }
                 else
                 {
-                    SetSummaryCardsDetails();
+                    GetUserTDEEData(userID, date);
                 }
             }
 
@@ -511,33 +565,41 @@ public class DiaryActivity extends AppCompatActivity
         });
     }
 
+    private void GetUserTDEEData(String userID, String date)
+    {
+        tdeeDiaryDatabaseReference.child(userID).child(date)
+                .addListenerForSingleValueEvent(new ValueEventListener() {
+                    @Override
+                    public void onDataChange(@NonNull DataSnapshot snapshot)
+                    {
+                        if(snapshot.exists())
+                        {
+                            strUserDailyCalorieIntake = snapshot.getValue().toString();
+                        }
+                        else
+                        {
+                            strUserDailyCalorieIntake = "2300";
+                        }
+                        SetSummaryCardsDetails();
+                    }
+
+                    @Override
+                    public void onCancelled(@NonNull DatabaseError error) { }
+                });
+    }
+
 
     private void SetSummaryCardsDetails()
     {
         FormulaCalculations fc = new FormulaCalculations();
 
-        if (!TextUtils.isEmpty(strUserCurrentWeight) && !TextUtils.isEmpty(strUserByear) &&
-                !TextUtils.isEmpty(strUserHeight) && !TextUtils.isEmpty(strUserActivityLevel) &&
-                !TextUtils.isEmpty(strUserGender))
-        {
-
-            strUserAge = fc.Age(strUserByear);
-
-            strUserDailyCalorieIntake = fc.TDEE(strUserAge, strUserCurrentWeight, strUserHeight, strUserGender, strUserActivityLevel);
-
-        }
-        else
-        {
-            strUserDailyCalorieIntake="2300";
-        }
-
         userDailyCaloriesIntake.setText(strUserDailyCalorieIntake);
 
         userFoodCalories.setText(strUserFood);
         userWorkoutCalories.setText(strUserWorkout);
-        userCarbs.setText(strUserCarbs+"g");
-        userFat.setText(strUserFat+"g");
-        userProtein.setText(strUserProtein+"g");
+        userCarbs.setText(strUserCarbs+" g");
+        userFat.setText(strUserFat+" g");
+        userProtein.setText(strUserProtein+" g");
 
         strUserCaloriesRemaining = fc.CaloriesRemaining(strUserDailyCalorieIntake, strUserFood, strUserWorkout);
         userCaloriesRemaining.setText(strUserCaloriesRemaining);
@@ -554,83 +616,78 @@ public class DiaryActivity extends AppCompatActivity
         strUserWorkout="0";
     }
 
-
-    private void DisplayUserAllBreakfastFoods(final String userID, final String date)
+    private void DisplayUserFoods(final String userID, final String date, final String foodType, final RecyclerView recyclerView)
     {
 
-        Query userBreakfast = foodDiaryDatabaseReference.child(userID).child(date).orderByChild("foodType").equalTo("breakfast");
+        Query userFoodQuery = foodDiaryDatabaseReference.child(userID).child(date).orderByChild("foodType").equalTo(foodType);
 
-        FirebaseRecyclerOptions options =
+        FirebaseRecyclerOptions<Foods> options =
                 new FirebaseRecyclerOptions.Builder<Foods>()
-                .setQuery(userBreakfast, Foods.class)
+                .setQuery(userFoodQuery, Foods.class)
                 .build();
 
-        FirebaseRecyclerAdapter<Foods, UserFoodsViewHolder> firebaseRecyclerAdapter =
+        FirebaseRecyclerAdapter<Foods, UserFoodsViewHolder> adapter =
                 new FirebaseRecyclerAdapter<Foods, UserFoodsViewHolder>(options) {
                     @Override
                     protected void onBindViewHolder(@NonNull final UserFoodsViewHolder userFoodsViewHolder, int i, @NonNull Foods foodNutrition)
                     {
-                        final String foodID = getRef(i).getKey();
-                        if(!TextUtils.isEmpty(foodID))
+                        final String diaryEntryKey = getRef(i).getKey();
+                        if(!TextUtils.isEmpty(diaryEntryKey))
                         {
 
-                            foodDiaryDatabaseReference.child(userID).child(date).child(foodID).addValueEventListener(new ValueEventListener()
+                            foodDiaryDatabaseReference.child(userID).child(date).child(diaryEntryKey).addListenerForSingleValueEvent(new ValueEventListener()
                             {
                                 @Override
                                 public void onDataChange(@NonNull DataSnapshot dataSnapshot)
                                 {
                                     if(dataSnapshot.exists())
                                     {
+                                        final String foodID = dataSnapshot.child("foodID").getValue(String.class);
+                                        final String servings;
+
                                         if(dataSnapshot.hasChild("numberOfServing"))
                                         {
-                                            breakfastNumberOfServings = dataSnapshot.child("numberOfServing").getValue().toString();
+                                            servings = dataSnapshot.child("numberOfServing").getValue(String.class);
                                         }
+                                        else
+                                        {
+                                            servings = "1";
+                                        }
+
+                                        foodDatabaseReference.child(foodID).addListenerForSingleValueEvent(new ValueEventListener()
+                                        {
+                                            @Override
+                                            public void onDataChange(@NonNull DataSnapshot dataSnapshot)
+                                            {
+                                                if(dataSnapshot.exists())
+                                                {
+                                                    if(dataSnapshot.hasChild("foodname"))
+                                                    {
+                                                        String foodName = dataSnapshot.child("foodname").getValue(String.class);
+                                                        userFoodsViewHolder.layoutfoodname.setText(foodName);
+                                                    }
+                                                    if(dataSnapshot.hasChild("foodcalories"))
+                                                    {
+                                                        String foodCalories = dataSnapshot.child("foodcalories").getValue(String.class);
+                                                        foodCalories = String.format(Locale.US,"%.0f cal",(Double.parseDouble(servings) * Double.parseDouble(foodCalories)));
+                                                        userFoodsViewHolder.layoutfoodcalorie.setText(foodCalories);
+                                                    }
+                                                }
+                                            }
+
+                                            @Override
+                                            public void onCancelled(@NonNull DatabaseError databaseError)
+                                            {
+                                            }
+                                        });
                                     }
                                 }
-
                                 @Override
                                 public void onCancelled(@NonNull DatabaseError databaseError)
                                 {
 
                                 }
                             });
-
-                            foodDatabaseReference.child(foodID).addValueEventListener(new ValueEventListener()
-                            {
-                                @Override
-                                public void onDataChange(@NonNull DataSnapshot dataSnapshot)
-                                {
-                                    if(dataSnapshot.exists())
-                                    {
-                                        if(dataSnapshot.hasChild("foodservingsize"))
-                                        {
-                                            breakfastServingSize = dataSnapshot.child("foodservingsize").getValue().toString();
-                                        }
-
-                                        if(dataSnapshot.hasChild("foodname"))
-                                        {
-                                            String foodName = dataSnapshot.child("foodname").getValue().toString();
-                                            userFoodsViewHolder.layoutfoodname.setText(foodName);
-                                        }
-
-                                        if(dataSnapshot.hasChild("foodcalories"))
-                                        {
-                                            String foodCalories = dataSnapshot.child("foodcalories").getValue().toString();
-                                            foodCalories = String.format(Locale.US,"%.0f",(Double.parseDouble(breakfastNumberOfServings) * Double.parseDouble(foodCalories)) / Double.parseDouble(breakfastServingSize));
-                                            userFoodsViewHolder.layoutfoodcalorie.setText(foodCalories);
-                                        }
-                                    }
-                                }
-
-                                @Override
-                                public void onCancelled(@NonNull DatabaseError databaseError)
-                                {
-
-                                }
-                            });
-
-                            breakfastNumberOfServings = "1";
-                            breakfastServingSize = "1";
                         }
 
                     }
@@ -640,291 +697,14 @@ public class DiaryActivity extends AppCompatActivity
                     public UserFoodsViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType)
                     {
                         View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.user_food_layout, parent, false);
-                        UserFoodsViewHolder userFoodsViewHolder = new UserFoodsViewHolder(view);
-                        return userFoodsViewHolder;
+                        return new UserFoodsViewHolder(view);
                     }
                 };
 
-        userBreakfastFoodList.setAdapter(firebaseRecyclerAdapter);
-        firebaseRecyclerAdapter.startListening();
+        recyclerView.setAdapter(adapter);
+        adapter.startListening();
 
     }
-
-
-
-    private void DisplayUserAllLunchFoods(final String userID, final String date)
-    {
-
-        Query userLunch = foodDiaryDatabaseReference.child(userID).child(date).orderByChild("foodType").equalTo("lunch");
-
-
-        FirebaseRecyclerOptions options =
-                new FirebaseRecyclerOptions.Builder<Foods>()
-                        .setQuery(userLunch, Foods.class)
-                        .build();
-
-        FirebaseRecyclerAdapter<Foods, UserFoodsViewHolder> firebaseRecyclerAdapter =
-                new FirebaseRecyclerAdapter<Foods, UserFoodsViewHolder>(options) {
-                    @Override
-                    protected void onBindViewHolder(@NonNull final UserFoodsViewHolder userFoodsViewHolder, int i, @NonNull Foods foodNutrition)
-                    {
-                        final String foodID = getRef(i).getKey();
-                        if(!TextUtils.isEmpty(foodID))
-                        {
-                            foodDiaryDatabaseReference.child(userID).child(date).child(foodID).addValueEventListener(new ValueEventListener()
-                            {
-                                @Override
-                                public void onDataChange(@NonNull DataSnapshot dataSnapshot)
-                                {
-                                    if(dataSnapshot.exists())
-                                    {
-                                        if(dataSnapshot.hasChild("numberOfServing"))
-                                        {
-                                            lunchNumberOfServings = dataSnapshot.child("numberOfServing").getValue().toString();
-                                        }
-                                    }
-                                }
-
-                                @Override
-                                public void onCancelled(@NonNull DatabaseError databaseError)
-                                {
-
-                                }
-                            });
-
-                            foodDatabaseReference.child(foodID).addValueEventListener(new ValueEventListener()
-                            {
-                                @Override
-                                public void onDataChange(@NonNull DataSnapshot dataSnapshot)
-                                {
-                                    if(dataSnapshot.exists())
-                                    {
-                                        if(dataSnapshot.hasChild("foodservingsize"))
-                                        {
-                                            lunchServingSize = dataSnapshot.child("foodservingsize").getValue().toString();
-                                        }
-
-                                        if(dataSnapshot.hasChild("foodname"))
-                                        {
-                                            String foodName = dataSnapshot.child("foodname").getValue().toString();
-                                            userFoodsViewHolder.layoutfoodname.setText(foodName);
-                                        }
-                                        if(dataSnapshot.hasChild("foodcalories"))
-                                        {
-                                            String foodCalories = dataSnapshot.child("foodcalories").getValue().toString();
-                                            foodCalories = String.format(Locale.US,"%.0f",(Double.parseDouble(lunchNumberOfServings) * Double.parseDouble(foodCalories)) / Double.parseDouble(lunchServingSize));
-                                            userFoodsViewHolder.layoutfoodcalorie.setText(foodCalories);
-                                        }
-                                    }
-                                }
-
-                                @Override
-                                public void onCancelled(@NonNull DatabaseError databaseError)
-                                {
-
-                                }
-                            });
-
-                            lunchNumberOfServings = "1";
-                            lunchServingSize = "1";
-                        }
-                    }
-
-                    @NonNull
-                    @Override
-                    public UserFoodsViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType)
-                    {
-                        View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.user_food_layout, parent, false);
-                        UserFoodsViewHolder userFoodsViewHolder = new UserFoodsViewHolder(view);
-                        return userFoodsViewHolder;
-                    }
-                };
-        userLunchFoodList.setAdapter(firebaseRecyclerAdapter);
-        firebaseRecyclerAdapter.startListening();
-    }
-
-
-
-    private void DisplayUserAllDinnerFoods(final String userID, final String date)
-    {
-        Query userDinner = foodDiaryDatabaseReference.child(userID).child(date).orderByChild("foodType").equalTo("dinner");
-
-        FirebaseRecyclerOptions options =
-                new FirebaseRecyclerOptions.Builder<Foods>()
-                        .setQuery(userDinner, Foods.class)
-                        .build();
-
-        FirebaseRecyclerAdapter<Foods, UserFoodsViewHolder> firebaseRecyclerAdapter =
-                new FirebaseRecyclerAdapter<Foods, UserFoodsViewHolder>(options) {
-                    @Override
-                    protected void onBindViewHolder(@NonNull final UserFoodsViewHolder userFoodsViewHolder, int i, @NonNull Foods foodNutrition)
-                    {
-                        final String foodID = getRef(i).getKey();
-                        if(!TextUtils.isEmpty(foodID))
-                        {
-                            foodDiaryDatabaseReference.child(userID).child(date).child(foodID).addValueEventListener(new ValueEventListener()
-                            {
-                                @Override
-                                public void onDataChange(@NonNull DataSnapshot dataSnapshot)
-                                {
-                                    if(dataSnapshot.exists())
-                                    {
-                                        if(dataSnapshot.hasChild("numberOfServing"))
-                                        {
-                                            dinnerNumberOfServings = dataSnapshot.child("numberOfServing").getValue().toString();
-                                        }
-                                    }
-                                }
-
-                                @Override
-                                public void onCancelled(@NonNull DatabaseError databaseError)
-                                {
-
-                                }
-                            });
-
-                            foodDatabaseReference.child(foodID).addValueEventListener(new ValueEventListener()
-                            {
-                                @Override
-                                public void onDataChange(@NonNull DataSnapshot dataSnapshot)
-                                {
-                                    if(dataSnapshot.exists())
-                                    {
-                                        if(dataSnapshot.hasChild("foodservingsize"))
-                                        {
-                                            dinnerServingSize = dataSnapshot.child("foodservingsize").getValue().toString();
-                                        }
-
-                                        if(dataSnapshot.hasChild("foodname"))
-                                        {
-                                            String foodName = dataSnapshot.child("foodname").getValue().toString();
-                                            userFoodsViewHolder.layoutfoodname.setText(foodName);
-                                        }
-                                        if(dataSnapshot.hasChild("foodcalories"))
-                                        {
-                                            String foodCalories = dataSnapshot.child("foodcalories").getValue().toString();
-                                            foodCalories = String.format(Locale.US,"%.0f",(Double.parseDouble(dinnerNumberOfServings) * Double.parseDouble(foodCalories)) / Double.parseDouble(dinnerServingSize));
-                                            userFoodsViewHolder.layoutfoodcalorie.setText(foodCalories);
-                                        }
-                                    }
-                                }
-
-                                @Override
-                                public void onCancelled(@NonNull DatabaseError databaseError)
-                                {
-
-                                }
-                            });
-
-                            dinnerNumberOfServings = "1";
-                            dinnerServingSize = "1";
-                        }
-
-                    }
-
-                    @NonNull
-                    @Override
-                    public UserFoodsViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType)
-                    {
-                        View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.user_food_layout, parent, false);
-                        UserFoodsViewHolder userFoodsViewHolder = new UserFoodsViewHolder(view);
-                        return userFoodsViewHolder;
-                    }
-                };
-
-        userDinnerFoodList.setAdapter(firebaseRecyclerAdapter);
-        firebaseRecyclerAdapter.startListening();
-    }
-
-
-    private void DisplayUserAllSnacks(final String userID, final String date)
-    {
-        Query userDinner = foodDiaryDatabaseReference.child(userID).child(date).orderByChild("foodType").equalTo("snack");
-
-
-        FirebaseRecyclerOptions options =
-                new FirebaseRecyclerOptions.Builder<Foods>()
-                        .setQuery(userDinner, Foods.class)
-                        .build();
-
-        FirebaseRecyclerAdapter<Foods, UserFoodsViewHolder> firebaseRecyclerAdapter =
-                new FirebaseRecyclerAdapter<Foods, UserFoodsViewHolder>(options) {
-                    @Override
-                    protected void onBindViewHolder(@NonNull final UserFoodsViewHolder userFoodsViewHolder, int i, @NonNull Foods foodNutrition)
-                    {
-                        final String foodID = getRef(i).getKey();
-                        if(!TextUtils.isEmpty(foodID))
-                        {
-                            foodDiaryDatabaseReference.child(userID).child(date).child(foodID).addValueEventListener(new ValueEventListener()
-                            {
-                                @Override
-                                public void onDataChange(@NonNull DataSnapshot dataSnapshot)
-                                {
-                                    if(dataSnapshot.exists())
-                                    {
-                                        if(dataSnapshot.hasChild("numberOfServing"))
-                                        {
-                                            snackNumberOfServings = dataSnapshot.child("numberOfServing").getValue().toString();
-                                        }
-                                    }
-                                }
-
-                                @Override
-                                public void onCancelled(@NonNull DatabaseError databaseError)
-                                {
-
-                                }
-                            });
-
-                            foodDatabaseReference.child(foodID).addValueEventListener(new ValueEventListener()
-                            {
-                                @Override
-                                public void onDataChange(@NonNull DataSnapshot dataSnapshot)
-                                {
-                                    if(dataSnapshot.exists())
-                                    {
-                                        if(dataSnapshot.hasChild("foodname"))
-                                        {
-                                            String foodName = dataSnapshot.child("foodname").getValue().toString();
-                                            userFoodsViewHolder.layoutfoodname.setText(foodName);
-                                        }
-                                        if(dataSnapshot.hasChild("foodcalories"))
-                                        {
-                                            String foodCalories = dataSnapshot.child("foodcalories").getValue().toString();
-                                            foodCalories = String.format(Locale.US,"%.0f",(Double.parseDouble(snackNumberOfServings) * Double.parseDouble(foodCalories)) / Double.parseDouble(snackServingSize));
-                                            userFoodsViewHolder.layoutfoodcalorie.setText(foodCalories);
-                                        }
-                                    }
-                                }
-
-                                @Override
-                                public void onCancelled(@NonNull DatabaseError databaseError)
-                                {
-
-                                }
-                            });
-
-                            snackNumberOfServings = "1";
-                            snackServingSize = "1";
-                        }
-
-                    }
-
-                    @NonNull
-                    @Override
-                    public UserFoodsViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType)
-                    {
-                        View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.user_food_layout, parent, false);
-                        UserFoodsViewHolder userFoodsViewHolder = new UserFoodsViewHolder(view);
-                        return userFoodsViewHolder;
-                    }
-                };
-
-        userSnacksFoodList.setAdapter(firebaseRecyclerAdapter);
-        firebaseRecyclerAdapter.startListening();
-
-    }
-
 
     private void DisplayUserAllWorkouts(String userID, String date)
     {
@@ -957,9 +737,6 @@ public class DiaryActivity extends AppCompatActivity
         firebaseRecyclerAdapter.startListening();
     }
 
-
-
-
     public static class UserFoodsViewHolder extends RecyclerView.ViewHolder
     {
         TextView layoutfoodname, layoutfoodcalorie;
@@ -972,8 +749,6 @@ public class DiaryActivity extends AppCompatActivity
             layoutfoodcalorie = (TextView)itemView.findViewById(R.id.userfood_calories);
         }
     }
-
-
 
     private void DisplayUserWaterGlasses(String userID, String date)
     {

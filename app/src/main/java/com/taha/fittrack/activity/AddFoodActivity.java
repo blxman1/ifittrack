@@ -50,7 +50,7 @@ public class AddFoodActivity extends AppCompatActivity
     private Button addbtn;
     private LinearLayout numberOfServingsContainer;
 
-    private String foodNameValue, servingSizeValue, numberOfSizeValue="1", servingSizeUnitValue, caloriesValue, carbsValue, fatValue, proteinValue,
+    private String foodNameValue, servingSizeValue, numberOfServingValue="1", servingSizeUnitValue, caloriesValue, carbsValue, fatValue, proteinValue,
             foodCreator, createdByValue;
 
 
@@ -131,19 +131,19 @@ public class AddFoodActivity extends AppCompatActivity
             }
         });
 
-        numberOfServingsContainer.setOnClickListener(new View.OnClickListener()
+        numberOfServings.setOnClickListener(new View.OnClickListener()
         {
             @Override
             public void onClick(View v)
             {
-                PopupServingSizeEditDialog();
+                PopupnumberOfServingEditDialog();
             }
         });
     }
 
 
 
-    private void PopupServingSizeEditDialog()
+    private void PopupnumberOfServingEditDialog()
     {
         final Dialog numberOfServingEditDialog = new Dialog(this);
         numberOfServingEditDialog.requestWindowFeature(Window.FEATURE_NO_TITLE);
@@ -184,7 +184,7 @@ public class AddFoodActivity extends AppCompatActivity
                 }
                 else
                 {
-                    numberOfSizeValue = numberOfServingsInput.getText().toString();
+                    numberOfServingValue = numberOfServingsInput.getText().toString();
                     numberOfServingEditDialog.cancel();
                     NewValueCalculation();
                 }
@@ -192,22 +192,20 @@ public class AddFoodActivity extends AppCompatActivity
         });
     }
 
-
-
     private void NewValueCalculation()
     {
-        numberOfServings.setText(numberOfSizeValue);
+        numberOfServings.setText(numberOfServingValue);
 
-        String newCaloriesValue = String.format(Locale.US,"%.0f",(Double.parseDouble(numberOfSizeValue) * Double.parseDouble(caloriesValue)) / Double.parseDouble(servingSizeValue));
-        calories.setText(newCaloriesValue +" Calories");
+        String newCaloriesValue = String.format(Locale.US,"%.0f",(Double.parseDouble(numberOfServingValue) * Double.parseDouble(caloriesValue)));
+        calories.setText(newCaloriesValue + " Calories");
 
-        String newCrabsValue = String.format(Locale.US,"%.1f",(Double.parseDouble(numberOfSizeValue) * Double.parseDouble(carbsValue)) / Double.parseDouble(servingSizeValue));
+        String newCrabsValue = String.format(Locale.US,"%.1f",(Double.parseDouble(numberOfServingValue) * Double.parseDouble(carbsValue)));
         carbs.setText(newCrabsValue+"g");
 
-        String newFatValue = String.format(Locale.US,"%.1f",(Double.parseDouble(numberOfSizeValue) * Double.parseDouble(fatValue)) / Double.parseDouble(servingSizeValue));
+        String newFatValue = String.format(Locale.US,"%.1f",(Double.parseDouble(numberOfServingValue) * Double.parseDouble(fatValue)));
         fat.setText(newFatValue+"g");
 
-        String newProteinValue = String.format(Locale.US,"%.1f",(Double.parseDouble(numberOfSizeValue) * Double.parseDouble(proteinValue)) / Double.parseDouble(servingSizeValue));
+        String newProteinValue = String.format(Locale.US,"%.1f",(Double.parseDouble(numberOfServingValue) * Double.parseDouble(proteinValue)));
         protein.setText(newProteinValue+"g");
 
     }
@@ -315,17 +313,20 @@ public class AddFoodActivity extends AppCompatActivity
 
             HashMap diaryMap = new HashMap();
             diaryMap.put("foodType", intentFrom.toLowerCase());
-            diaryMap.put("numberOfServing", numberOfSizeValue);
-
+            diaryMap.put("foodID", intentFoodID);
+            diaryMap.put("numberOfServing", numberOfServingValue);
 
             /* get current date */
             Calendar calendar = Calendar.getInstance();
             SimpleDateFormat currenDate = new SimpleDateFormat("dd-MMM-yyyy");
             String currentDate = currenDate.format(calendar.getTime());
 
+            String diaryEntryKey = diaryDatabaseReference.child(currentUserID)
+                    .child(currentDate)
+                    .push()
+                    .getKey();
 
-
-            diaryDatabaseReference.child(currentUserID).child(currentDate).child(intentFoodID).updateChildren(diaryMap).addOnCompleteListener(new OnCompleteListener()
+            diaryDatabaseReference.child(currentUserID).child(currentDate).child(diaryEntryKey).updateChildren(diaryMap).addOnCompleteListener(new OnCompleteListener()
             {
                 @Override
                 public void onComplete(@NonNull Task task)

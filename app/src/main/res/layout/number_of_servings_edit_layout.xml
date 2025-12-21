@@ -15,7 +15,7 @@
             android:id="@+id/textView2"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="Serving Size"
+            android:text="Number of Serving"
             android:textColor="@color/PrimaryTextColor"
             android:textSize="20sp"
             android:textStyle="bold" />
