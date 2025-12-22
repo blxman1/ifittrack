@@ -264,13 +264,26 @@
                 android:layout_height="62dp"
                 android:layout_gravity="center"
                 android:layout_marginTop="50dp"
-                android:layout_marginBottom="40dp"
+                android:layout_marginBottom="10dp"
                 android:background="@drawable/button_style_01"
                 android:text="Add Food"
                 android:textAllCaps="false"
                 android:textColor="@color/ButtonTextColor"
                 android:textSize="18sp" />
 
+            <Button
+                android:id="@+id/addfood_deletebutton"
+                android:layout_width="match_parent"
+                android:layout_height="62dp"
+                android:layout_gravity="center"
+                android:layout_marginTop="16dp"
+                android:layout_marginBottom="40dp"
+                android:background="@drawable/button_style_01"
+                android:text="Delete"
+                android:textAllCaps="false"
+                android:textColor="@android:color/white"
+                android:textSize="18sp"
+                android:visibility="gone" />
 
         </LinearLayout>
     </ScrollView>

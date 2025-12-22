@@ -16,6 +16,7 @@ import android.view.ViewGroup;
 import android.widget.DatePicker;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
+import android.widget.RelativeLayout;
 import android.widget.TextView;
 
 import com.taha.fittrack.model.Foods;
@@ -277,10 +278,10 @@ public class DiaryActivity extends AppCompatActivity
                 else
                 {
                     GetUserData(currentUserID, diaryChangedDate);
-                    DisplayUserFoods(intentUserID, diaryChangedDate, "breakfast", userBreakfastFoodList);
-                    DisplayUserFoods(intentUserID, diaryChangedDate, "lunch", userLunchFoodList);
-                    DisplayUserFoods(intentUserID, diaryChangedDate, "dinner", userDinnerFoodList);
-                    DisplayUserFoods(intentUserID, diaryChangedDate, "snack", userSnacksFoodList);
+                    DisplayUserFoods(currentUserID, diaryChangedDate, "breakfast", userBreakfastFoodList);
+                    DisplayUserFoods(currentUserID, diaryChangedDate, "lunch", userLunchFoodList);
+                    DisplayUserFoods(currentUserID, diaryChangedDate, "dinner", userDinnerFoodList);
+                    DisplayUserFoods(currentUserID, diaryChangedDate, "snack", userSnacksFoodList);
                     DisplayUserAllWorkouts(currentUserID, diaryChangedDate);
                     DisplayUserWaterGlasses(currentUserID, diaryChangedDate);
                 }
@@ -672,6 +673,18 @@ public class DiaryActivity extends AppCompatActivity
                                                         foodCalories = String.format(Locale.US,"%.0f cal",(Double.parseDouble(servings) * Double.parseDouble(foodCalories)));
                                                         userFoodsViewHolder.layoutfoodcalorie.setText(foodCalories);
                                                     }
+
+                                                    userFoodsViewHolder.foodItemContainer.setOnClickListener(new View.OnClickListener() {
+                                                        @Override
+                                                        public void onClick(View v) {
+                                                            Intent viewFoodIntent = new Intent(DiaryActivity.this, ViewFoodActivity.class);
+                                                            viewFoodIntent.putExtra("diaryEntryKey", diaryEntryKey);
+                                                            viewFoodIntent.putExtra("diaryDate", date);
+                                                            viewFoodIntent.putExtra("foodType", foodType);
+
+                                                            startActivityForResult(viewFoodIntent, 1);
+                                                        }
+                                                    });
                                                 }
                                             }
 
@@ -740,6 +753,7 @@ public class DiaryActivity extends AppCompatActivity
     public static class UserFoodsViewHolder extends RecyclerView.ViewHolder
     {
         TextView layoutfoodname, layoutfoodcalorie;
+        RelativeLayout foodItemContainer;
 
         public UserFoodsViewHolder(@NonNull View itemView)
         {
@@ -747,6 +761,7 @@ public class DiaryActivity extends AppCompatActivity
 
             layoutfoodname = (TextView)itemView.findViewById(R.id.userfood_name);
             layoutfoodcalorie = (TextView)itemView.findViewById(R.id.userfood_calories);
+            foodItemContainer = (RelativeLayout) itemView.findViewById(R.id.food_item_container);
         }
     }
 
@@ -779,6 +794,30 @@ public class DiaryActivity extends AppCompatActivity
 
             }
         });
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+
+        if (requestCode == 1 && resultCode == RESULT_OK) {
+
+            String displayDate = diaryDate.getText().toString();
+            String dateToUse;
+
+            if (displayDate.equals("Today")) {
+
+                dateToUse = currentDate;
+            } else {
+                dateToUse = displayDate;
+            }
+
+            if(intentFrom.equals("ViewAnotherUserProfile") && !currentUserID.equals(intentUserID)) {
+                GetUserData(intentUserID, dateToUse);
+            } else {
+                GetUserData(currentUserID, dateToUse);
+            }
+        }
     }
 
 

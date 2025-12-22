@@ -26,6 +26,7 @@
         <activity android:name=".activity.PostCommentActivity" />
         <activity android:name=".activity.CreateServiceActivity" />
         <activity android:name=".activity.AddFoodActivity" />
+        <activity android:name=".activity.ViewFoodActivity" />
         <activity
             android:name=".activity.FindActivity"
             android:screenOrientation="unspecified" />
