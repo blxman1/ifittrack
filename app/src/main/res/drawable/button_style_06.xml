@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="utf-8"?>
+<selector xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <!-- Pressed state -->
+    <item android:state_pressed="true">
+        <shape android:shape="rectangle">
+            <gradient
+                android:startColor="#00B894"
+                android:centerColor="#00CEC9"
+                android:endColor="#74B9FF"
+                android:angle="135" />
+            <corners android:radius="12dp"/>
+        </shape>
+    </item>
+
+    <!-- Default state - Accent gradient button -->
+    <item>
+        <shape android:shape="rectangle">
+            <gradient
+                android:startColor="#00CEC9"
+                android:centerColor="#74B9FF"
+                android:endColor="#A29BFE"
+                android:angle="135" />
+            <corners android:radius="12dp"/>
+        </shape>
+    </item>
+
+</selector>

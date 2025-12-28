@@ -1,0 +1,91 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <!-- Modern Fitness App Color Palette -->
+    <color name="colorPrimary">#6C5CE7</color>
+    <color name="colorPrimaryDark">#5B4CDB</color>
+    <color name="colorAccent">#FF6B6B</color>
+
+    <!-- Secondary Accent Colors -->
+    <color name="colorSecondaryAccent">#00CEC9</color>
+    <color name="colorTertiary">#FDCB6E</color>
+    <color name="colorSuccess">#00B894</color>
+    <color name="colorWarning">#FDCB6E</color>
+    <color name="colorDanger">#FF7675</color>
+
+    <!-- Gradient Colors -->
+    <color name="gradientStart">#6C5CE7</color>
+    <color name="gradientCenter">#A29BFE</color>
+    <color name="gradientEnd">#74B9FF</color>
+
+    <!-- Background Colors -->
+    <color name="BackgroundPrimaryColor">#F8F9FA</color>
+    <color name="BackgroundSecondaryColor">#EDF2F7</color>
+    <color name="BackgroundDarkColor">#1A1A2E</color>
+    <color name="CardBackgroundColor">#FFFFFF</color>
+    <color name="SurfaceColor">#FFFFFF</color>
+
+    <!-- Navigation & Status Bar -->
+    <color name="ToolBarColor">#6C5CE7</color>
+    <color name="StatusBarColor">#5B4CDB</color>
+    <color name="AppNavigationBarColor">#FFFFFF</color>
+    <color name="SystemNavigationBarColor">#FFFFFF</color>
+    <color name="BottomNavSelected">#6C5CE7</color>
+    <color name="BottomNavUnselected">#A0AEC0</color>
+
+    <!-- Icon Colors -->
+    <color name="IconColor">#718096</color>
+    <color name="IconActiveColor">#6C5CE7</color>
+    <color name="IconLightColor">#FFFFFF</color>
+
+    <!-- Divider & Line Colors -->
+    <color name="LineColor">#E2E8F0</color>
+    <color name="DividerColor">#EDF2F7</color>
+
+    <!-- Text Colors -->
+    <color name="TitleTextColor">#1A202C</color>
+    <color name="PrimaryTextColor">#2D3748</color>
+    <color name="SecondaryTextColor">#718096</color>
+    <color name="LightTextColor">#FFFFFF</color>
+    <color name="HintTextColor">#A0AEC0</color>
+    <color name="DisabledTextColor">#CBD5E0</color>
+    <color name="ErrorTextColor">#E53E3E</color>
+    <color name="WarningTextColor">#DD6B20</color>
+    <color name="SuccessTextColor">#38A169</color>
+    <color name="ButtonTextColor">#FFFFFF</color>
+    <color name="LinkTextColor">#6C5CE7</color>
+
+    <!-- Card Colors -->
+    <color name="CardShadowColor">#1A000000</color>
+    <color name="CardBorderColor">#E2E8F0</color>
+
+    <!-- Stat Card Accent Colors -->
+    <color name="CaloriesAccent">#FF6B6B</color>
+    <color name="FoodAccent">#00CEC9</color>
+    <color name="WorkoutAccent">#FDCB6E</color>
+    <color name="WaterAccent">#74B9FF</color>
+    <color name="WeightAccent">#A29BFE</color>
+    <color name="BMIAccent">#00B894</color>
+
+    <!-- BMI Status Colors -->
+    <color name="BMIUnderweight">#74B9FF</color>
+    <color name="BMIHealthy">#00B894</color>
+    <color name="BMIOverweight">#FDCB6E</color>
+    <color name="BMIObesity">#FF7675</color>
+
+    <!-- Input Field Colors -->
+    <color name="InputBackgroundColor">#F7FAFC</color>
+    <color name="InputBorderColor">#E2E8F0</color>
+    <color name="InputFocusedBorderColor">#6C5CE7</color>
+    <color name="InputErrorBorderColor">#E53E3E</color>
+
+    <!-- Overlay Colors -->
+    <color name="OverlayColor">#80000000</color>
+    <color name="RippleColor">#1A6C5CE7</color>
+
+    <!-- Social Colors -->
+    <color name="LikeColor">#E53E3E</color>
+    <color name="CommentColor">#6C5CE7</color>
+    <color name="ShareColor">#00CEC9</color>
+
+</resources>
